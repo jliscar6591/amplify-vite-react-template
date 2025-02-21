@@ -1,51 +1,52 @@
 import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { useAuthenticator } from '@aws-amplify/ui-react';
-import { generateClient } from "aws-amplify/data";
+import { BrowserRouter as Router, Route, Routes, BrowserRouter } from "react-router-dom";
+import SignInPage from './pages/SignInPage';
+import DashboardAgent from './pages/DashboardAgent';
+import DashboardBuyer from './pages/DashboardBuyer';
+import DashboardSeller from './pages/DashboardSeller';
+import PropertiesPage from './pages/PropertiesPage';
+import ClientsPage from './pages/ClientsPage';
+import DocumentsPage from './pages/DocumentsPage';
+import ProfilePage from './pages/ProfilePage';
+import ThemeToggle from './components/ThemeToggle';
+import { CssBaseline } from '@mui/joy';
+import "./styles/Global.css";
+import Sidebar from "./components/Sidebar";
+import { CssVarsProvider } from '@mui/joy/styles';
 
-const client = generateClient<Schema>();
+
 
 function App() {
-  const { user, signOut } = useAuthenticator();
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
-
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
-
-
-  function deleteTodo(id: string) {
-    client.models.Todo.delete({ id })
-  }
 
   return (
-    <main>
-      <h1>{user?.signInDetails?.loginId}'s todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li
-            onClick={() => deleteTodo(todo.id)}
-            key={todo.id}>
-            {todo.content}
-          </li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
-      </div>
-      <button onClick={signOut}>Sign out</button>
-    </main>
+    <CssVarsProvider disableTransitionOnChange>
+    <CssBaseline />
+    <div style={{ display: 'flex' }}>
+      {/* Only show Sidebar if not on the sign-in page */}
+
+
+      <BrowserRouter>
+            <Sidebar />
+        <Routes>
+          {/* Sign In Route */}
+          <Route path="/" element={<SignInPage />} />
+
+          {/* Dashboards by role */}
+          <Route path="/agent/dashboard" element={<DashboardAgent />} />
+          <Route path="/buyer/dashboard" element={<DashboardBuyer />} />
+          <Route path="/seller/dashboard" element={<DashboardSeller />} />
+
+          {/* Other routes */}
+          <Route path="/properties" element={<PropertiesPage />} />
+          <Route path="/clients" element={<ClientsPage />} />
+          <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
+  </CssVarsProvider>
+
   );
 }
 
